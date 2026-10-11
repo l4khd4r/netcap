@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <unistd.h>
-
+#include "../include/ethernet.h"
 int main(int argc, char **argv) {
 
     int fd;
@@ -51,11 +51,11 @@ int main(int argc, char **argv) {
             return 1;
         }
         printf("Received packet of length %zd bytes\n", length);
-
-        printf("Packet data (first 16 bytes): ");
-        for (int i = 0; i < 16 && i < length; i++) {
-            printf("%02x ", buffer[i]);
+        t_ethernet_header header;
+        if (ethernet_parse(buffer, length, &header) == -1) {
+            fprintf(stderr, "Failed to parse Ethernet header\n");
         }
+        print_ethernet(&header);
     }
 
     close(fd);
