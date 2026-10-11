@@ -8,6 +8,8 @@
 #include "../include/ethernet.h"
 #include "../include/protocol.h"
 #include "../include/ipv4.h"
+#include "../include/tcp.h"
+
 #include <arpa/inet.h>
 
 static void print_ipv4(const t_ipv4_header *header)
@@ -77,6 +79,7 @@ int main(int argc, char **argv) {
         printf("Received packet of length %zd bytes\n", length);
         t_ethernet_header header;
         t_ipv4_header ipv4_header; 
+        t_tcp_header tcp_header;
         if (ethernet_parse(buffer, length, &header) == -1) {
             fprintf(stderr, "Failed to parse Ethernet header\n");
         }
@@ -90,7 +93,19 @@ int main(int argc, char **argv) {
             continue;
         }
         print_ipv4(&ipv4_header);
+        if(ipv4_header.protocol != 6)
+            continue; // Not a TCP packet
+
+        if(tcp_parse(buffer + ETHERNET_HEADER_LEN + (ipv4_header.ihl * 4), length - ETHERNET_HEADER_LEN - (ipv4_header.ihl * 4), &tcp_header) == -1) {
+            fprintf(stderr, "Failed to parse TCP header\n");
+            continue ;
+        }
+
+
+
+        print_tcp(&tcp_header);
     }
+
 
     close(fd);
     return 0 ;
