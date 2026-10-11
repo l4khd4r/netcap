@@ -9,6 +9,7 @@
 #include "../include/protocol.h"
 #include "../include/ipv4.h"
 #include "../include/tcp.h"
+#include "../include/udp.h"
 
 #include <arpa/inet.h>
 
@@ -80,6 +81,7 @@ int main(int argc, char **argv) {
         t_ethernet_header header;
         t_ipv4_header ipv4_header; 
         t_tcp_header tcp_header;
+        t_udp_header udp_header;
         if (ethernet_parse(buffer, length, &header) == -1) {
             fprintf(stderr, "Failed to parse Ethernet header\n");
         }
@@ -93,6 +95,15 @@ int main(int argc, char **argv) {
             continue;
         }
         print_ipv4(&ipv4_header);
+        if(ipv4_header.protocol == 17) {
+            if(udp_parse(buffer + ETHERNET_HEADER_LEN + (ipv4_header.ihl * 4), length - ETHERNET_HEADER_LEN - (ipv4_header.ihl * 4), &udp_header) == -1) {
+                fprintf(stderr, "Failed to parse UDP header\n");
+                continue ;
+            }
+            print_udp(&udp_header);
+        }
+
+
         if(ipv4_header.protocol != 6)
             continue; // Not a TCP packet
 
