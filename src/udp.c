@@ -33,7 +33,7 @@ int udp_parse(const uint8_t *data , size_t length , t_udp_header *header)
 
 void print_udp(const t_udp_header *header)
 {
-    printf("UDP\n");
+    printf("\033[32mUDP\033[0m\n");
     printf("  Source port:      %u\n", header->src_port);
     printf("  Destination port: %u\n", header->dest_port);
     printf("  Length:           %u bytes\n", header->length);

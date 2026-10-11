@@ -19,7 +19,7 @@ static uint32_t read_be32(const uint8_t *data)
 
 void print_tcp(const t_tcp_header *header)
 {
-    printf("TCP\n");
+    printf("\033[34mTCP\033[0m\n");
     printf("  Source port:      %u\n", header->src_port);
     printf("  Destination port: %u\n", header->dest_port);
     printf("  Sequence number:  %u\n", header->sequence_number);

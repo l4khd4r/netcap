@@ -10,7 +10,7 @@
 #include "../include/ipv4.h"
 #include "../include/tcp.h"
 #include "../include/udp.h"
-
+#include "../include/icmp.h"
 #include <arpa/inet.h>
 
 static void print_ipv4(const t_ipv4_header *header)
@@ -103,6 +103,14 @@ int main(int argc, char **argv) {
             print_udp(&udp_header);
         }
 
+        if(ipv4_header.protocol == 1) {
+            t_icmp_header icmp_header;
+            if(icmp_parse(buffer + ETHERNET_HEADER_LEN + (ipv4_header.ihl * 4), length - ETHERNET_HEADER_LEN - (ipv4_header.ihl * 4), &icmp_header) == -1) {
+                fprintf(stderr, "Failed to parse ICMP header\n");
+                continue ;
+            }
+            print_icmp(&icmp_header);
+        }
 
         if(ipv4_header.protocol != 6)
             continue; // Not a TCP packet
