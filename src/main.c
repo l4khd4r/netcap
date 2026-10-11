@@ -1,0 +1,63 @@
+#include <arpa/inet.h>
+#include <linux/if_ether.h>
+#include <linux/if_packet.h>
+#include <net/if.h>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <unistd.h>
+
+int main(int argc, char **argv) {
+
+    int fd;
+    struct sockaddr_ll addr = {0};
+    unsigned char buffer[66536];
+    ssize_t length;
+
+    if (argc != 2) {
+        fprintf(stderr,  "Usage: %s <interface>\n" , argv[0]);
+        return 1;
+    }
+
+    unsigned int ifindex = if_nametoindex(argv[1]);
+    if (ifindex == 0) {
+        perror("if_nametoindex");
+        return 1;
+    }
+
+
+    fd  = socket(AF_PACKET  , SOCK_RAW , htons(ETH_P_ALL));
+
+    if (fd == -1) {
+        perror("socket");
+        return 1;
+    }
+
+    addr.sll_family = AF_PACKET ;
+    addr.sll_protocol = htons(ETH_P_ALL);
+    addr.sll_ifindex = ifindex;
+
+    if(bind(fd, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
+        perror("bind");
+        close(fd);
+        return 1;
+    }
+    printf("Capturing on %s. Press Ctrl+C to stop.\n", argv[1]);
+
+    while(1) {
+        length = recvfrom(fd, buffer,  sizeof(buffer), 0 , NULL , NULL);
+        if(length == -1 ) {
+            perror("recvfrom");
+            close(fd);
+            return 1;
+        }
+        printf("Received packet of length %zd bytes\n", length);
+
+        printf("Packet data (first 16 bytes): ");
+        for (int i = 0; i < 16 && i < length; i++) {
+            printf("%02x ", buffer[i]);
+        }
+    }
+
+    close(fd);
+    return 0 ;
+}
