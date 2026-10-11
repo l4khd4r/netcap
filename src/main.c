@@ -6,6 +6,29 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "../include/ethernet.h"
+
+#include "../include/ipv4.h"
+#include <arpa/inet.h>
+
+static void print_ipv4(const t_ipv4_header *header)
+{
+    printf("IPv4\n");
+    printf("  Source:      %u.%u.%u.%u\n",
+        header->src_ip[0], header->src_ip[1],
+        header->src_ip[2], header->src_ip[3]);
+    printf("  Destination: %u.%u.%u.%u\n",
+        header->dest_ip[0], header->dest_ip[1],
+        header->dest_ip[2], header->dest_ip[3]);
+    printf("  TTL:         %u\n", header->ttl);
+    printf("  Protocol:    %u\n", header->protocol);
+    printf("  Header len:  %u bytes\n", header->ihl * 4);
+    printf("  Total len:   %u bytes\n", header->total_length);
+}
+
+
+
+
+
 int main(int argc, char **argv) {
 
     int fd;
@@ -41,6 +64,7 @@ int main(int argc, char **argv) {
         close(fd);
         return 1;
     }
+
     printf("Capturing on %s. Press Ctrl+C to stop.\n", argv[1]);
 
     while(1) {
@@ -52,10 +76,20 @@ int main(int argc, char **argv) {
         }
         printf("Received packet of length %zd bytes\n", length);
         t_ethernet_header header;
+        t_ipv4_header ipv4_header; 
         if (ethernet_parse(buffer, length, &header) == -1) {
             fprintf(stderr, "Failed to parse Ethernet header\n");
         }
         print_ethernet(&header);
+
+        if(header.ethertype != 0x0800)
+            continue; // Not an IPv4 packet
+
+        if(ipv4_parse(buffer + ETHERNET_HEADER_LEN, length - ETHERNET_HEADER_LEN, &ipv4_header) == -1) {
+            fprintf(stderr, "Failed to parse IPv4 header\n");
+            continue;
+        }
+        print_ipv4(&ipv4_header);
     }
 
     close(fd);
