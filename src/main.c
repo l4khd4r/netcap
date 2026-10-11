@@ -6,7 +6,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "../include/ethernet.h"
-
+#include "../include/protocol.h"
 #include "../include/ipv4.h"
 #include <arpa/inet.h>
 
@@ -20,7 +20,7 @@ static void print_ipv4(const t_ipv4_header *header)
         header->dest_ip[0], header->dest_ip[1],
         header->dest_ip[2], header->dest_ip[3]);
     printf("  TTL:         %u\n", header->ttl);
-    printf("  Protocol:    %u\n", header->protocol);
+    printf("  Protocol:    %s (%u)\n", ipv4_protocol_name(header->protocol), header->protocol);
     printf("  Header len:  %u bytes\n", header->ihl * 4);
     printf("  Total len:   %u bytes\n", header->total_length);
 }
