@@ -90,10 +90,14 @@ static void process_packet(const unsigned char *buffer,
         stats->malformed_packets++;
         return;
     }
-
     stats->ipv4_packets++;
     print_ipv4(&ip);
 
+
+    if(ip.fragment_offset != 0) {
+      printf(" IPv4 fragment : non-initial, offset=%u bytes\n", ip.fragment_offset * 8 );
+      return ;
+    }
     payload = buffer + ETHERNET_HEADER_LEN + ip_header_len;
     payload_len = ip.total_length - ip_header_len;
 
