@@ -18,7 +18,7 @@ typedef struct ipv4_header
     uint8_t src_ip[IPV4_ADDR_LEN];
     uint8_t dest_ip[IPV4_ADDR_LEN];
     uint8_t flags;
-    uint8_t fragment_offset;
+    uint16_t fragment_offset;
 } t_ipv4_header;
 
 int ipv4_parse(const uint8_t *data, size_t length,
