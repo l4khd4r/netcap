@@ -25,7 +25,7 @@ int ipv4_parse(const uint8_t *data, size_t length,
     fragment_offset = ((uint16_t)data[6] << 8)  | data[7];
 
     header->flags =  (fragment_offset  >> 13) & 0x07;
-    header->fragment_offset =fragment_offset && 0x1FFF;
+    header->fragment_offset =fragment_offset & 0x1FFF;
 
     if (header_length < IPV4_MIN_HEADER_LEN
         || header_length > length)
@@ -34,7 +34,7 @@ int ipv4_parse(const uint8_t *data, size_t length,
     header->total_length = ((uint16_t)data[2] << 8)
         | (uint16_t)data[3];
 
-    if (header->total_length < header_length)
+    if (header->total_length < header_length || header->total_length > length)
         return -1;
 
     header->ttl = data[8];
